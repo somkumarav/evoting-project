@@ -50,6 +50,7 @@ export const Login = () => {
         } else {
           connectWallet()
             .then((acc) => {
+              console.log(acc);
               logIn({ ...res.data.user, account: acc });
               if (res.data.user.role === 'voter') {
                 navigate('/voter');

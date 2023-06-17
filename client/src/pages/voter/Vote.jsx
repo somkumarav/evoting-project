@@ -3,6 +3,7 @@ import { Nav } from '../../components/Nav';
 import Election from '../../contracts/Election.json';
 import Web3 from 'web3';
 import { Modal } from '../../components/Modal';
+import { useAuth } from '../../auth';
 
 const getLocalStorage = () => {
   let election = localStorage.getItem('election');
@@ -14,6 +15,7 @@ const getLocalStorage = () => {
 };
 
 export const Vote = () => {
+  const { user } = useAuth();
   const [data, setData] = useState(getLocalStorage());
   const [state, setState] = useState({ web3: null, contract: null });
   const [allCandidates, setAllCandidates] = useState([]); //[{name:'name',party:'party'}
@@ -40,6 +42,11 @@ export const Vote = () => {
   }, []);
 
   useEffect(() => {
+    const getVoted = async () => {
+      const voter = await state.contract.methods.voters(user.account).call();
+      console.log(voter);
+      setVoted(voter.voted);
+    };
     const getCandidates = async () => {
       const candidateCount = await state.contract.methods
         .candidatesCount()
@@ -53,10 +60,18 @@ export const Vote = () => {
       }
     };
 
-    console.log(state.contract);
-
-    state.contract && getCandidates();
+    state.contract && getCandidates() && getVoted();
   }, [state.contract]);
+
+  // useEffect(() => {
+  //   const getVoted = async () => {
+  //     console.log('hello');
+  //     const voter = await state.contract.methods.voters(user.account).call();
+  //     console.log(voter);
+  //     setVoted(voter.voted);
+  //   };
+  //   getVoted();
+  // }, []);
 
   const handleSubmit = async (e, candidateId) => {
     e.preventDefault();
